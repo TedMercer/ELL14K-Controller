@@ -65,7 +65,7 @@ motor1.list_methods()
 motor1.close()
 ```
 
-## Function Overview
+## Functions Overview
 #### ElliptecMotorController Class:
 - send_command(command): Sends a command to the motor and returns the response.
 - move_rel(jogstep, direction='cw'): Moves the motor a relative distance.
@@ -73,14 +73,14 @@ motor1.close()
 - set_current_position_as_home(): Sets the current position of the motor as the new home position.
 - continuous_move(velocity, direction, duration): Moves the motor continuously at the specified velocity and direction.
   
-## Utils Module:
+## Utils-Module:
 #### The Utils.py file contains utility functions that aid in motor control:
 - degrees_to_hex(degrees): Converts degrees to hexadecimal step size.
 - hex_to_degrees(hex_value): Converts hexadecimal step size back to degrees.
 
 ## Examples
 
-## Contributions
+## Contributing
 Contributions are welcome! If you'd like to contribute, please follow these steps:
 
 1. Fork the repository.
