@@ -324,16 +324,6 @@ def time_motor_across_velocities(motor, degrees_per_rotation=360, min_velocity=3
     
     return results
 ## -----------------------------------------------------------------------------
-def list_available_functions():
-    """
-    Prints all functions available in the Master module.
-    """
-    functions = inspect.getmembers(__import__(__name__), inspect.isfunction)
-    print("Available functions in Master module:")
-    for name, _ in functions:
-        if not name.startswith("__"):
-            print(f"- {name}")
-## -----------------------------------------------------------------------------
 def span_angles(motors, angles, wait = 3):
     """
     Moves an array of motors to their corresponding angles using threading.
@@ -378,3 +368,13 @@ def span_angles(motors, angles, wait = 3):
         thread.join()
 
     print("All motors have moved through the specified angles.")
+## -----------------------------------------------------------------------------
+def list_available_functions():
+    """
+    Prints all functions available in the Master module.
+    """
+    functions = inspect.getmembers(__import__(__name__), inspect.isfunction)
+    print("Available functions in Master module:")
+    for name, _ in functions:
+        if not name.startswith("__"):
+            print(f"- {name}")
