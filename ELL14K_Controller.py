@@ -333,3 +333,48 @@ def list_available_functions():
     for name, _ in functions:
         if not name.startswith("__"):
             print(f"- {name}")
+## -----------------------------------------------------------------------------
+def span_angles(motors, angles, wait = 3):
+    """
+    Moves an array of motors to their corresponding angles using threading.
+
+    Parameters:
+    -----------
+    motors : list of ElliptecMotorController
+        List of motor instances to move.
+    angles : list of int
+        List of target angles (in degrees) corresponding to each motor.
+    wait : int
+        time delay between angles
+
+    Returns:
+    --------
+    None
+    """
+    
+    def move_motor_through_angles(motor, angles):
+        """
+        Helper function to move a motor sequentially through all angles.
+        """
+        for angle in angles:
+            motor.move_abs(angle)
+            print(f"Motor {motor.motornum} moved to {angle} degrees.")
+            time.sleep(wait)
+
+    # Create a list to hold the threads
+    threads = []
+
+    # Assign angles to motors and create threads for each motor
+    for motor in motors:
+        thread = threading.Thread(target=move_motor_through_angles, args=(motor, angles))
+        threads.append(thread)
+
+    # Start all threads
+    for thread in threads:
+        thread.start()
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
+    print("All motors have moved through the specified angles.")
