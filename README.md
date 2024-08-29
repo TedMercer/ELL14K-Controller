@@ -40,8 +40,8 @@ pip install numpy as np
 
 Clone the repository to your local machine:
 ```bash
-  git clone https://github.com/yourusername/elliptec-motor-controller.git
-  cd elliptec-motor-controller
+  git clone https://github.com/TedMercer/ELL14K-Controller.git
+  cd ELL14K-Controller
 ```
 
 ## Usage
