@@ -249,7 +249,7 @@ def synchronized_frequency_search(motor1, motor2):
 
 ## -----------------------------------------------------------------------------
 def simultaneous_move(motor1, motor2, velocity=32, direction='cw', duration=15,
-                      offset1=13, offset2=0):
+                      offset1=8, offset2=0):
     """
     Moves two motors simultaneously using threading.
     """
@@ -368,6 +368,93 @@ def span_angles(motors, angles, wait = 3):
         thread.join()
 
     print("All motors have moved through the specified angles.")
+    
+## -----------------------------------------------------------------------------
+def _move_motor_and_time(motor, degrees):
+    """
+    Moves the motor by a specified number of degrees and times the movement.
+    Waits for the motor to finish the movement before stopping the timer.
+    """
+    start_time = time.time()
+
+    motor.send_command(f'{motor.motornum}sj{degrees}')
+    motor.send_command(f'{motor.motornum}fw')
+
+    while True:
+        status = motor.send_command(f'{motor.motornum}gs')
+        if status.startswith(f'{motor.motornum}GS00'):
+            break
+        time.sleep(0.1)
+
+    elapsed_time = time.time() - start_time
+    print(f'Motor {motor.motornum} moved in {np.round(elapsed_time, 5)} seconds - {hex_to_degrees(degrees)}°')
+    return elapsed_time
+## -----------------------------------------------------------------------------
+
+def find_best_speed(motor1, motor2, degree_arr = [360,720]*3, 
+                    speed_arr = np.arange(30,40+1,1)):
+    results = {
+        motor1.motornum: {},  
+        motor2.motornum: {}
+    }
+
+    for speed in speed_arr:
+        
+        motor1.send_command(f'{motor1.motornum}ho0')
+        time.sleep(2)
+        motor2.send_command(f'{motor2.motornum}ho0')
+        time.sleep(2)
+        motor1.send_command(f'sv{motor1.motornum}{speed}')
+        motor2.send_command(f'sv{motor2.motornum}{speed}')
+        
+        for deg in degree_arr:
+            hexi = degrees_to_hex(deg)
+            time.sleep(2)
+            m1_time = _move_motor_and_time(motor1, hexi)
+            time.sleep(2)  
+            m2_time = _move_motor_and_time(motor2, hexi)
+            time.sleep(2)
+            motor1.send_command(f'{motor1.motornum}ho0')
+            time.sleep(2)
+            motor2.send_command(f'{motor2.motornum}ho0')
+
+            
+            if deg not in results[motor1.motornum]:
+                results[motor1.motornum][deg] = []
+            if deg not in results[motor2.motornum]:
+                results[motor2.motornum][deg] = []
+
+            results[motor1.motornum][deg].append(m1_time)
+            results[motor2.motornum][deg].append(m2_time)
+
+    
+    avg_times_motor1 = {deg: np.mean(times) for deg, times in results[motor1.motornum].items()}
+    avg_times_motor2 = {deg: np.mean(times) for deg, times in results[motor2.motornum].items()}
+
+    
+    best_velocity_motor1 = None
+    best_velocity_motor2 = None
+    smallest_time_diff = float('inf')
+
+    for speed in speed_arr:
+        for deg in degree_arr:
+            if deg in avg_times_motor1 and deg in avg_times_motor2:
+                time_diff = abs(avg_times_motor1[deg] - avg_times_motor2[deg])
+                if time_diff < smallest_time_diff:
+                    smallest_time_diff = time_diff
+                    best_velocity_motor1 = speed
+                    best_velocity_motor2 = speed
+
+    print("\n--- Average Times ---")
+    print(f"Motor {motor1.motornum} average times: {avg_times_motor1}")
+    print(f"Motor {motor2.motornum} average times: {avg_times_motor2}")
+
+    print("\n" "Best matching velocities are:" "\n")
+    print(f"Motor {motor1.motornum} -> {best_velocity_motor1}")
+    print(f"Motor {motor2.motornum} -> {best_velocity_motor2}")
+
+    return avg_times_motor1, avg_times_motor2, best_velocity_motor1, best_velocity_motor2
+            
 ## -----------------------------------------------------------------------------
 def list_available_functions():
     """
