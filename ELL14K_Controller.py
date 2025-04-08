@@ -146,14 +146,32 @@ class ElliptecMotorController:
         return None
 
 ## -----------------------------------------------------------------------------
-    def set_home_offset(self, offset_hex):
+    def set_home_offset(self, offset_degrees):
         """
-        Sets the home offset of the motor using the provided hexadecimal position.
+        Sets the home offset of the motor to the specified angle in degrees.
+    
+        Parameters:
+        offset_degrees (float): The desired home offset in degrees. Must be between 0 and +90 degrees.
         """
-        set_offset_command = f'{self.motornum}so{offset_hex}'
-        response = self.send_command(set_offset_command)
+        if not (0 <= offset_degrees <= 90):
+            print("Error: Offset must be between 0 and 90 degrees.")
+            return
+    
+        # Convert degrees to encoder pulses
+        pulses_per_degree = 51200 / 360
+        offset_pulses = int(offset_degrees * pulses_per_degree)
+    
+        # Convert pulses to hexadecimal and format as an 8-character string
+        offset_hex = f"{offset_pulses:08X}"
+    
+        # Construct and send the command
+        command = f"{self.motornum}so{offset_hex}"
+        response = self.send_command(command)
+    
         if response:
-            print(f"Home offset set to {offset_hex} for motor {self.motornum}")
+            print(f"Home offset set to {offset_degrees} degrees for motor {self.motornum}")
+            # Home the device to apply the new offset
+            self.home()
         else:
             print(f"Failed to set home offset for motor {self.motornum}")
 
